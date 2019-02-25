@@ -79,6 +79,10 @@ class GrfFileHeader
 		$this->headerSeed = unpack('L', $headerRead, 34);
 		$this->headerFileCount = unpack('L', $headerRead, 38);
 		$this->headerVersion = unpack('L', $headerRead, 42);
+
+		// Ajust file count size.
+		// https://github.com/carloshenrq/grf/blob/master/src/grf.c#L700
+		$this->headerFileCount -= ($this->headerSeed + 7);
 	}
 
 	/**
