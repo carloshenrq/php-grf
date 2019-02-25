@@ -29,119 +29,119 @@
  */
 class GrfFileHeader
 {
-	/**
-	 * Must be 'Master of Magic' 16 caracters.
-	 *
-	 * @var string
-	 */
-	private $headerMagic;
+    /**
+     * Must be 'Master of Magic' 16 caracters.
+     *
+     * @var string
+     */
+    private $headerMagic;
 
-	/**
-	 * Header key for this grf file.
-	 *
-	 * @var string
-	 */
-	private $headerKey;
+    /**
+     * Header key for this grf file.
+     *
+     * @var string
+     */
+    private $headerKey;
 
-	/**
-	 * @var int
-	 */
-	private $headerOffset;
+    /**
+     * @var int
+     */
+    private $headerOffset;
 
-	/**
-	 * @int
-	 */
-	private $headerSeed;
+    /**
+     * @int
+     */
+    private $headerSeed;
 
-	/**
-	 * @int
-	 */
-	private $headerFileCount;
+    /**
+     * @int
+     */
+    private $headerFileCount;
 
-	/**
-	 * @int
-	 */
-	private $headerVersion;
+    /**
+     * @int
+     */
+    private $headerVersion;
 
-	/**
-	 * Gets the grf file header.
-	 * 
-	 * @param string $headerReader Full grf header file.
-	 *
-	 * @return void
-	 */
-	public function __construct($headerRead)
-	{
-		// Reads the header
-		$this->headerMagic = trim(substr($headerRead, 0, 16));
-		$this->headerKey = trim(substr($headerRead, 16, 14));
-		$this->headerOffset = unpack('L', $headerRead, 30);
-		$this->headerSeed = unpack('L', $headerRead, 34);
-		$this->headerFileCount = unpack('L', $headerRead, 38);
-		$this->headerVersion = unpack('L', $headerRead, 42);
+    /**
+     * Gets the grf file header.
+     * 
+     * @param string $headerReader Full grf header file.
+     *
+     * @return void
+     */
+    public function __construct($headerRead)
+    {
+        // Reads the header
+        $this->headerMagic = trim(substr($headerRead, 0, 16));
+        $this->headerKey = trim(substr($headerRead, 16, 14));
+        $this->headerOffset = unpack('L', $headerRead, 30);
+        $this->headerSeed = unpack('L', $headerRead, 34);
+        $this->headerFileCount = unpack('L', $headerRead, 38);
+        $this->headerVersion = unpack('L', $headerRead, 42);
 
-		// Ajust file count size.
-		// https://github.com/carloshenrq/grf/blob/master/src/grf.c#L700
-		$this->headerFileCount -= ($this->headerSeed + 7);
-	}
+        // Ajust file count size.
+        // https://github.com/carloshenrq/grf/blob/master/src/grf.c#L700
+        $this->headerFileCount -= ($this->headerSeed + 7);
+    }
 
-	/**
-	 * Returns the magic header into grf
-	 *
-	 * @return string
-	 */
-	public function getMagic()
-	{
-		return $this->headerMagic;
-	}
+    /**
+     * Returns the magic header into grf
+     *
+     * @return string
+     */
+    public function getMagic()
+    {
+        return $this->headerMagic;
+    }
 
-	/**
-	 * Returns the key into the grf.
-	 *
-	 * @return string
-	 */
-	public function getKey()
-	{
-		return $this->headerKey;
-	}
+    /**
+     * Returns the key into the grf.
+     *
+     * @return string
+     */
+    public function getKey()
+    {
+        return $this->headerKey;
+    }
 
-	/**
-	 * Returns the file table offset
-	 *
-	 * @return int
-	 */
-	public function getOffset()
-	{
-		return $this->headerOffset;
-	}
+    /**
+     * Returns the file table offset
+     *
+     * @return int
+     */
+    public function getOffset()
+    {
+        return $this->headerOffset;
+    }
 
-	/**
-	 * Returns the seed that write into GRF
-	 *
-	 * @return int
-	 */
-	public function getSeed()
-	{
-		return $this->headerSeed;
-	}
+    /**
+     * Returns the seed that write into GRF
+     *
+     * @return int
+     */
+    public function getSeed()
+    {
+        return $this->headerSeed;
+    }
 
-	/**
-	 * Returns the file count into this GRF file.
-	 *
-	 * @return int
-	 */
-	public function getFileCount()
-	{
-		return $this->headerFileCount;
-	}
+    /**
+     * Returns the file count into this GRF file.
+     *
+     * @return int
+     */
+    public function getFileCount()
+    {
+        return $this->headerFileCount;
+    }
 
-	/**
-	 * Returns the current version that GRF is written
-	 *
-	 * @return int
-	 */
-	public function getVersion()
-	{
-		return $this->headerVersion;
-	}
+    /**
+     * Returns the current version that GRF is written
+     *
+     * @return int
+     */
+    public function getVersion()
+    {
+        return $this->headerVersion;
+    }
 }

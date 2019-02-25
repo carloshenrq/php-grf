@@ -29,130 +29,130 @@
  */
 class GrfFile
 {
-	/**
-	 * The grf filename.
-	 *
-	 * @var string
-	 */
-	private $fileName;
+    /**
+     * The grf filename.
+     *
+     * @var string
+     */
+    private $fileName;
 
-	/**
-	 * Handles the file size.
-	 *
-	 * @var int
-	 */
-	private $fileSize;
+    /**
+     * Handles the file size.
+     *
+     * @var int
+     */
+    private $fileSize;
 
-	/**
-	 * File hander to grf
-	 *
-	 * @var resource
-	 */
-	private $ptrFile;
+    /**
+     * File hander to grf
+     *
+     * @var resource
+     */
+    private $ptrFile;
 
-	/**
-	 * Header information about grf.
-	 *
-	 * @var GrfFileHeader
-	 */
-	private $header;
+    /**
+     * Header information about grf.
+     *
+     * @var GrfFileHeader
+     */
+    private $header;
 
-	/**
-	 * Constructor for reading grf file
-	 *
-	 * @param string $fileName Name of the archive
-	 *
-	 * @return void
-	 */
-	public function __construct($fileName)
-	{
-		// The file doesn't exists?
-		if (file_exists($fileName) === false)
-			throw new GrfFileNotFoundException($fileName);
+    /**
+     * Constructor for reading grf file
+     *
+     * @param string $fileName Name of the archive
+     *
+     * @return void
+     */
+    public function __construct($fileName)
+    {
+        // The file doesn't exists?
+        if (file_exists($fileName) === false)
+            throw new GrfFileNotFoundException($fileName);
 
-		$this->fileName = $fileName;
-		$this->ptrFile = fopen($this->fileName, 'rb+');
+        $this->fileName = $fileName;
+        $this->ptrFile = fopen($this->fileName, 'rb+');
 
-		// Reads this grf header
-		$this->readHeader();
-	}
+        // Reads this grf header
+        $this->readHeader();
+    }
 
-	/**
-	 * This reader the grf header struct
-	 *
-	 * @see https://github.com/carloshenrq/grf/blob/master/includes/grf.h#L103-L110
-	 *
-	 * @return void
-	 */
-	private function readHeader()
-	{
-		// Read the full header
-		fseek($this->ptrFile, 0, SEEK_SET);
-		$headerRead = fread($this->ptrFile, GrfFile::GRF_HEADER_SIZE);
+    /**
+     * This reader the grf header struct
+     *
+     * @see https://github.com/carloshenrq/grf/blob/master/includes/grf.h#L103-L110
+     *
+     * @return void
+     */
+    private function readHeader()
+    {
+        // Read the full header
+        fseek($this->ptrFile, 0, SEEK_SET);
+        $headerRead = fread($this->ptrFile, GrfFile::GRF_HEADER_SIZE);
 
-		// Set the header parser
-		$this->header = new GrfFileHeader($headerRead);
-	}
+        // Set the header parser
+        $this->header = new GrfFileHeader($headerRead);
+    }
 
-	/**
-	 * Calculates the full grf file size.
-	 *
-	 * @return int
-	 */
-	public function getFullSize()
-	{
-		$last = ftell($this->ptrFile);
-		fseek($this->ptrFile, 0, SEEK_END);
-		$this->fileSize = ftell($this->ptrFile);
-		fseek($this->ptrFile, $last, SEEK_SET);
+    /**
+     * Calculates the full grf file size.
+     *
+     * @return int
+     */
+    public function getFullSize()
+    {
+        $last = ftell($this->ptrFile);
+        fseek($this->ptrFile, 0, SEEK_END);
+        $this->fileSize = ftell($this->ptrFile);
+        fseek($this->ptrFile, $last, SEEK_SET);
 
-		return $this->fileSize;
-	}
+        return $this->fileSize;
+    }
 
-	/**
-	 * Returns the file header readed.
-	 *
-	 * @return GrfFileHeader
-	 */
-	public function getHeader()
-	{
-		return $this->header;
-	}
+    /**
+     * Returns the file header readed.
+     *
+     * @return GrfFileHeader
+     */
+    public function getHeader()
+    {
+        return $this->header;
+    }
 
-	/**
-	 * Object destructor, closes the file handler
-	 *
-	 * @return void
-	 */
-	public function __destruct()
-	{
-		$this->close();
-	}
+    /**
+     * Object destructor, closes the file handler
+     *
+     * @return void
+     */
+    public function __destruct()
+    {
+        $this->close();
+    }
 
-	/**
-	 * Closes the grf file handler
-	 *
-	 * @return void
-	 */
-	public function close()
-	{
-		if ($this->ptrFile !== null) {
-			fclose($this->ptrFile);
-			$this->ptrFile = null;
-		}
-	}
+    /**
+     * Closes the grf file handler
+     *
+     * @return void
+     */
+    public function close()
+    {
+        if ($this->ptrFile !== null) {
+            fclose($this->ptrFile);
+            $this->ptrFile = null;
+        }
+    }
 
-	/**
-	 * Total header size.
-	 * 
-	 * @var int
-	 */
-	const GRF_HEADER_SIZE = 0x2e;
+    /**
+     * Total header size.
+     * 
+     * @var int
+     */
+    const GRF_HEADER_SIZE = 0x2e;
 
-	/**
-	 * The header magic data.
-	 *
-	 * @var string
-	 */
-	const GRF_HEADER_MAGIC = "Master of Magic";
+    /**
+     * The header magic data.
+     *
+     * @var string
+     */
+    const GRF_HEADER_MAGIC = "Master of Magic";
 }
