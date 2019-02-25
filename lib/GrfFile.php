@@ -121,7 +121,6 @@ class GrfFile
 
         // get info about broken pos...
         $brokenpos = fread($this->ptrFile, 4);
-        $brokenpos = unpack('L', $brokenpos, 0)[1];
         
         // decompress table-info data, can read file info with this
         $table = zlib_decode($table_comp);
