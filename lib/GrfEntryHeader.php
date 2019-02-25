@@ -106,6 +106,21 @@ class GrfEntryHeader
     }
 
     /**
+     * Gets the hash for the file
+     * 
+     * @param string $algo Algorithm that'll hash the files
+     * 
+     * @return string
+     */
+    public function getHash($algo = 'md5')
+    {
+        $buffer = $this->getCompressedBuffer();
+        $hash = hash($algo, $buffer);
+        unset ($buffer);
+        return $hash;
+    }
+
+    /**
      * Fetches the uncompressed buffer for this entry in grf file
      * 
      * @return string
