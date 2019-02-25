@@ -44,6 +44,13 @@ class GrfFile
     private $fileSize;
 
     /**
+     * Gets the start of table offset
+     * 
+     * @var int
+     */
+    private $tableOffset;
+
+    /**
      * File hander to grf
      *
      * @var resource
@@ -56,6 +63,13 @@ class GrfFile
      * @var GrfFileHeader
      */
     private $header;
+
+    /**
+     * All entries in grf file.
+     * 
+     * @var array
+     */
+    private $entries;
 
     /**
      * Constructor for reading grf file
@@ -73,8 +87,82 @@ class GrfFile
         $this->fileName = $fileName;
         $this->ptrFile = fopen($this->fileName, 'rb+');
 
+        $this->entries = new ArrayObject();
+
         // Reads this grf header
         $this->readHeader();
+        $this->readTableFiles();
+    }
+
+    /**
+     * Performs a read in table files
+     */
+    private function readTableFiles()
+    {
+        // No files to be readed?
+        if ($this->getHeader()->getFileCount() == 0)
+            return;
+
+        $posinfo = [];
+
+        // places the reader pointer in start of table files.
+        fseek($this->ptrFile, $this->getTableOffset(), SEEK_SET);
+
+        // read 8 bytes about posinfo
+        // https://github.com/carloshenrq/grf/blob/master/src/grf.c#L823
+        $buffer = fread($this->ptrFile, 8);
+        $posinfo[0] = unpack('L', $buffer, 0)[1];
+        $posinfo[1] = unpack('L', $buffer, 4)[1];
+        unset($buffer);
+
+        // Read table info
+        $table_comp = fread($this->ptrFile, $posinfo[0]);
+        $table = null;
+
+        // get info about broken pos...
+        $brokenpos = fread($this->ptrFile, 4);
+        $brokenpos = unpack('L', $brokenpos, 0)[1];
+        
+        // decompress table-info data, can read file info with this
+        $table = zlib_decode($table_comp);
+
+        // Entries read, populates it to be in memory
+        $pos = 0;
+        $tbm_table = $table;
+        $max_pos = $posinfo[1];
+        while ($pos < $max_pos) {
+            $av_len = $max_pos - $pos;
+            $fn_len = $this->getAvLen($tbm_table, $av_len);
+
+            $filename = utf8_encode(substr($table, $pos, $fn_len));
+            $pos += ($fn_len + 1);
+
+            $entry = new GrfEntryHeader($filename, substr($table, $pos), $this);
+            $pos += $entry->getHeaderLength();
+
+            $this->entries[] = $entry;
+            $tbm_table = substr($table, $pos);
+        }
+
+        return;
+    }
+
+    /**
+     * Gets the file size string
+     * 
+     * @param string $str    File table
+     * @param int    $maxLen max len to be readed
+     * 
+     * @return int
+     */
+    private function getAvLen($str, $maxLen)
+    {
+        for ($i = 0; $i < $maxLen; $i++) {
+            if (ord($str[$i]) == NULL)
+                return $i;
+        }
+
+        return $maxLen;
     }
 
     /**
@@ -92,6 +180,29 @@ class GrfFile
 
         // Set the header parser
         $this->header = new GrfFileHeader($headerRead);
+
+        // Table files offset
+        $this->tableOffset = $this->getHeader()->getOffset() + GrfFile::GRF_HEADER_SIZE;
+    }
+
+    /**
+     * Get all entries in grf file.
+     * 
+     * @return ArrayObject
+     */
+    public function getEntries()
+    {
+        return $this->entries;
+    }
+
+    /**
+     * Get start of tables files inside grf.
+     * 
+     * @return int
+     */
+    public function getTableOffset()
+    {
+        return $this->tableOffset;
     }
 
     /**
@@ -107,6 +218,24 @@ class GrfFile
         fseek($this->ptrFile, $last, SEEK_SET);
 
         return $this->fileSize;
+    }
+
+    /**
+     * Fetches the request offset and len
+     * 
+     * @param int $offset read offset
+     * @param int $len    size of read
+     * 
+     * @return string
+     */
+    public function readBuffer($offset, $len)
+    {
+        $last = ftell($this->ptrFile);
+        fseek($this->ptrFile, $offset, SEEK_SET);
+        $buffer = fread($this->ptrFile, $len);
+        fseek($this->ptrFile, $last, SEEK_SET);
+
+        return $buffer;
     }
 
     /**
