@@ -43,6 +43,9 @@ class BufferReader
      * Constructor for buffer reader
      * 
      * @param string $buffer byte array to be read.
+     * @param int    $pos    Start reading position
+     * 
+     * @return void
      */
     public function __construct($buffer, $pos = 0)
     {
