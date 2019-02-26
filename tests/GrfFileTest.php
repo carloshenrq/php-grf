@@ -53,7 +53,7 @@ class GrfFileTest extends PHPUnit\Framework\TestCase
         $this->assertEquals('829ce15b9b3c89baccdfbc4d7fe3d435', $grfEntry->getHash());
 
         $hashBuffer = hash('md5', $grfEntry->getUnCompressedBuffer());
-        $hashFile = hash_file('md5', 'tests\\0_Tex1.bmp');
+        $hashFile = hash_file('md5', 'tests/0_Tex1.bmp');
 
         $this->assertEquals($hashFile, $hashBuffer);
     }
