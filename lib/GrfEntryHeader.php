@@ -86,27 +86,17 @@ class GrfEntryHeader
      * @param string $name   filename
      * @param string $buffer bytes to populate the header entry
      */
-    public function __construct($name, $buffer, GrfFile $grf)
+    public function __construct($name, BufferReader $buffer, GrfFile $grf)
     {
         $this->grf = $grf;
 
         $this->filename = $name;
-        $this->size = 0;
-        $this->compressedSize = unpack('L', $buffer)[1];
-        $this->size += 4;
-        $buffer = substr($buffer, 4);
-        $this->compressedSizeAligned = unpack('L', $buffer)[1];
-        $this->size += 4;
-        $buffer = substr($buffer, 4);
-        $this->unCompressedSize = unpack('L', $buffer)[1];
-        $this->size += 4;
-        $buffer = substr($buffer, 4);
-        $this->flags = unpack('C', $buffer)[1];
-        $this->size += 1;
-        $buffer = substr($buffer, 1);
-        $this->offset = unpack('L', $buffer)[1];
-        $this->offset += GrfFile::GRF_HEADER_SIZE;
-        $this->size += 4;
+        $this->compressedSize = $buffer->getUInt32();
+        $this->compressedSizeAligned = $buffer->getUInt32();
+        $this->unCompressedSize = $buffer->getUInt32();
+        $this->flags = $buffer->getUInt8();
+        $this->offset = $buffer->getUInt32() + GrfFile::GRF_HEADER_SIZE;
+        $this->size = 17; // Fixed
     }
 
     /**

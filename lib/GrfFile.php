@@ -112,11 +112,10 @@ class GrfFile
 
         // read 8 bytes about posinfo
         // https://github.com/carloshenrq/grf/blob/master/src/grf.c#L823
-        $buffer = fread($this->ptrFile, 8);
-        $posinfo[0] = unpack('L', $buffer)[1];
-        $buffer = substr($buffer, 4);
-        $posinfo[1] = unpack('L', $buffer)[1];
-        unset($buffer);
+        $buffer = new BufferReader(fread($this->ptrFile, 8));
+        $posinfo[0] = $buffer->getUInt32();
+        $posinfo[1] = $buffer->getUInt32();
+        $buffer = null;
 
         // Read table info
         $table_comp = fread($this->ptrFile, $posinfo[0]);
@@ -139,7 +138,7 @@ class GrfFile
             $filename = utf8_encode(substr($table, $pos, $fn_len));
             $pos += ($fn_len + 1);
 
-            $entry = new GrfEntryHeader($filename, substr($table, $pos), $this);
+            $entry = new GrfEntryHeader($filename, new BufferReader(substr($table, $pos)), $this);
             $pos += $entry->getHeaderLength();
 
             $this->entries[] = $entry;
@@ -181,7 +180,7 @@ class GrfFile
         $headerRead = fread($this->ptrFile, GrfFile::GRF_HEADER_SIZE);
 
         // Set the header parser
-        $this->header = new GrfFileHeader($headerRead);
+        $this->header = new GrfFileHeader(new BufferReader($headerRead));
 
         // Table files offset
         $this->tableOffset = $this->getHeader()->getOffset() + GrfFile::GRF_HEADER_SIZE;

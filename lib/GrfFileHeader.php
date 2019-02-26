@@ -70,25 +70,22 @@ class GrfFileHeader
      *
      * @return void
      */
-    public function __construct($headerRead)
+    public function __construct(BufferReader $buffer)
     {
-        // Reads the header
-        $this->headerMagic = trim(substr($headerRead, 0, 16));
-        $this->headerKey = trim(substr($headerRead, 16, 14));
-
-        // fix: PHP 5.6 and 7.0 don't have the 3rd parameter...
-        $tmpBuffer = substr($headerRead, 30);
-        $this->headerOffset = unpack('L', $tmpBuffer)[1];
-        $tmpBuffer = substr($tmpBuffer, 4);
-        $this->headerSeed = unpack('L', $tmpBuffer)[1];
-        $tmpBuffer = substr($tmpBuffer, 4);
-        $this->headerFileCount = unpack('L', $tmpBuffer, 38)[1];
-        $tmpBuffer = substr($tmpBuffer, 4);
-        $this->headerVersion = unpack('L', $tmpBuffer, 42)[1];
+        // Reads the header from buffer
+        $this->headerMagic = $buffer->getString(16);
+        $this->headerKey = $buffer->getString(14);
+        $this->headerOffset = $buffer->getUInt32();
+        $this->headerSeed = $buffer->getUInt32();
+        $this->headerFileCount = $buffer->getUInt32();
+        $this->headerVersion = $buffer->getUInt32();
 
         // Ajust file count size.
         // https://github.com/carloshenrq/grf/blob/master/src/grf.c#L700
         $this->headerFileCount -= ($this->headerSeed + 7);
+
+        // Dispose buffer
+        $buffer = null;
     }
 
     /**
