@@ -46,4 +46,35 @@ class GrfFileNotReadTableTest extends PHPUnit\Framework\TestCase
     {
         $this->assertEquals($this->grf->getFullSize(), 936658);
     }
+
+    /**
+     * Test the entries info
+     */
+    public function testGetEntries()
+    {
+        $entries = $this->grf->getEntries();
+
+        $this->assertInstanceOf('ArrayObject', $entries);
+        $this->assertEquals(0, $entries->count());
+    }
+
+    /**
+     * Test the table files offset
+     */
+    public function testGetTableOffset()
+    {
+        $tableOffset = $this->grf->getTableOffset();
+        
+        $this->assertNotEquals(0, $tableOffset);
+        $this->assertEquals(78730, $tableOffset);
+    }
+
+    /**
+     * Test the destructor
+     */
+    public function testDestructor()
+    {
+        $this->grf = null;
+        $this->assertNull($this->grf);
+    }
 }
