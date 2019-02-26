@@ -178,28 +178,4 @@ class BufferReader
         $this->pos += 4;
         return $uint32[1];
     }
-
-    /**
-     * Fetches an signed int64 from buffer
-     * 
-     * @return int
-     */
-    public function getInt64()
-    {
-        $int64 = unpack('q', substr($this->buffer, $this->pos));
-        $this->pos += 8;
-        return $int64[1];
-    }
-
-    /**
-     * Fetches an unsigned int64 from buffer
-     * 
-     * @return int
-     */
-    public function getUInt64()
-    {
-        $uint64 = unpack('Q', substr($this->buffer, $this->pos));
-        $this->pos += 8;
-        return $uint64[1];
-    }
 }
