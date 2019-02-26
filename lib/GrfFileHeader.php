@@ -53,21 +53,21 @@ class GrfFileHeader
     /**
      * Seed from this grf file
      * 
-     * @int
+     * @var int
      */
     private $headerSeed;
 
     /**
      * File count in the header from this grf
      * 
-     * @int
+     * @var int
      */
     private $headerFileCount;
 
     /**
      * Version that grf was compressed
      * 
-     * @int
+     * @var int
      */
     private $headerVersion;
 
