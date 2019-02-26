@@ -65,3 +65,9 @@ composer require carloshlfz/php-grf
 ```
 
 Just make sure you've `vendor/autoload.php` loaded and is just start to use.
+
+## Credits and other infos
+
+The grf file inside tests folder `test200.grf` is from [arminherling/GRF](https://github.com/arminherling/GRF/).
+
+This code is based on [MagicalTux/grf](https://github.com/MagicalTux/grf)
