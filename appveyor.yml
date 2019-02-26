@@ -9,10 +9,6 @@ configuration:
 - php72
 - php73
 
-branches:
-  only:
-    - master
-
 cache:
     - '%LOCALAPPDATA%\Composer\files'
     - c:\projects\php-grf\composer.phar

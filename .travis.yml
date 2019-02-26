@@ -6,10 +6,6 @@ php:
   - 7.2
   - 7.3
 
-branches:
-  only:
-  - master
-
 cache:
     directories:
       - "$HOME/.composer/cache"
