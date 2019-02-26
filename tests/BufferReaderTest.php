@@ -66,5 +66,10 @@ class BufferReaderTest extends PHPUnit\Framework\TestCase
 
         $str = $reader->getString(15);
         $this->assertEquals($str, GrfFile::GRF_HEADER_MAGIC);
+
+        $this->assertEquals($reader->getLength(), $reader->getPos());
+
+        $reader->setPos(0);
+        $this->assertEquals(0, $reader->getPos());
     }
 }
