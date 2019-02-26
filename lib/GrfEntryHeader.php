@@ -92,15 +92,19 @@ class GrfEntryHeader
 
         $this->filename = $name;
         $this->size = 0;
-        $this->compressedSize = unpack('L', $buffer, $this->size)[1];
+        $this->compressedSize = unpack('L', $buffer)[1];
         $this->size += 4;
-        $this->compressedSizeAligned = unpack('L', $buffer, $this->size)[1];
+        $buffer = substr($buffer, 4);
+        $this->compressedSizeAligned = unpack('L', $buffer)[1];
         $this->size += 4;
-        $this->unCompressedSize = unpack('L', $buffer, $this->size)[1];
+        $buffer = substr($buffer, 4);
+        $this->unCompressedSize = unpack('L', $buffer)[1];
         $this->size += 4;
-        $this->flags = unpack('C', $buffer, $this->size)[1];
+        $buffer = substr($buffer, 4);
+        $this->flags = unpack('C', $buffer)[1];
         $this->size += 1;
-        $this->offset = unpack('L', $buffer, $this->size)[1];
+        $buffer = substr($buffer, 1);
+        $this->offset = unpack('L', $buffer)[1];
         $this->offset += GrfFile::GRF_HEADER_SIZE;
         $this->size += 4;
     }

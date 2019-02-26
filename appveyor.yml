@@ -29,7 +29,6 @@ install:
     - appveyor DownloadFile https://github.com/carloshenrq/chzapp/releases/download/v0.1.2/%CONFIGURATION%.zip
     - 7z x %CONFIGURATION%.zip -y >nul
     - del /Q *.zip
-    - copy /Y c:\projects\php-grf\build\appveyor-ci-apache-%CONFIGURATION% c:\Apache24\conf\httpd.conf
     - cd c:\php
     - appveyor DownloadFile https://raw.githubusercontent.com/symfony/binary-utils/master/cacert.pem
     - echo extension=php_gettext.dll >> php.ini
@@ -41,9 +40,6 @@ install:
     - IF %APPVEYOR_REPO_BRANCH%==master (SET COMPOSER_ROOT_VERSION=dev-master) ELSE (SET COMPOSER_ROOT_VERSION=%APPVEYOR_REPO_BRANCH%.x-dev)
     - php composer.phar update --no-progress --ansi
     - SET COMPOSER_ROOT_VERSION=
-    - cd c:\Apache24\bin
-    - httpd -k install -n "Apache24"
-    - net start Apache24
 
 before_test:
     - ruby -v

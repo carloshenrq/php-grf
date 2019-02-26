@@ -113,8 +113,9 @@ class GrfFile
         // read 8 bytes about posinfo
         // https://github.com/carloshenrq/grf/blob/master/src/grf.c#L823
         $buffer = fread($this->ptrFile, 8);
-        $posinfo[0] = unpack('L', $buffer, 0)[1];
-        $posinfo[1] = unpack('L', $buffer, 4)[1];
+        $posinfo[0] = unpack('L', $buffer)[1];
+        $buffer = substr($buffer, 4);
+        $posinfo[1] = unpack('L', $buffer)[1];
         unset($buffer);
 
         // Read table info
