@@ -23,4 +23,27 @@
  * SOFTWARE.
  */
 
+require_once 'lib/autoload.php';
 
+class GrfFileNotReadTableTest extends PHPUnit\Framework\TestCase
+{
+    /**
+     * The grf handler for testing
+     * 
+     * @var GrfFile
+     */
+    private $grf;
+
+    public function setUp()
+    {
+        $this->grf = new GrfFile('tests/test200.grf', false);
+    }
+
+    /**
+     * Verify the full size from test200.grf
+     */
+    public function testGetFullSize()
+    {
+        $this->assertEquals($this->grf->getFullSize(), 936658);
+    }
+}
