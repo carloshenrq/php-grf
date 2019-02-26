@@ -56,5 +56,8 @@ class GrfFileTest extends PHPUnit\Framework\TestCase
         $hashFile = hash_file('md5', 'tests/0_Tex1.bmp');
 
         $this->assertEquals($hashFile, $hashBuffer);
+
+        // AvString to test
+        $this->assertEquals(15, $this->grf->getAvLen(GrfFile::GRF_HEADER_MAGIC, 15));
     }
 }

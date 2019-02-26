@@ -156,7 +156,7 @@ class GrfFile
      * 
      * @return int
      */
-    private function getAvLen($str, $maxLen)
+    public function getAvLen($str, $maxLen)
     {
         for ($i = 0; $i < $maxLen; $i++) {
             if (ord($str[$i]) == NULL)
