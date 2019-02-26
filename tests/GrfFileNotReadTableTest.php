@@ -77,4 +77,18 @@ class GrfFileNotReadTableTest extends PHPUnit\Framework\TestCase
         $this->grf = null;
         $this->assertNull($this->grf);
     }
+
+    public function testGrfFileHeader()
+    {
+        $header = $this->grf->getHeader();
+
+        $this->assertNotNull($header);
+        $this->assertInstanceOf('GrfFileHeader', $header);
+
+        $this->assertEquals($header->getMagic(), GrfFile::GRF_HEADER_MAGIC);
+        $this->assertEquals(strlen($header->getKey()), 14);
+        $this->assertEquals(0, $header->getSeed());
+        $this->assertEquals(9, $header->getFileCount());
+        $this->assertEquals(0x200, $header->getVersion());
+    }
 }
