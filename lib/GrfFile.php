@@ -78,7 +78,7 @@ class GrfFile
      *
      * @return void
      */
-    public function __construct($fileName)
+    public function __construct($fileName, $readFileTables = true)
     {
         // The file doesn't exists?
         if (file_exists($fileName) === false)
@@ -91,7 +91,9 @@ class GrfFile
 
         // Reads this grf header
         $this->readHeader();
-        $this->readTableFiles();
+
+        if ($readFileTables)
+            $this->readTableFiles();
     }
 
     /**
