@@ -30,12 +30,12 @@
 final class Autoload
 {
     /**
-     * Método para registrar o autoload.
+     * Register method for autoload
+     * 
+     * @return void
      */
     public static function register()
     {
-        // Registra as funções de autoload para que se tenha
-        // o funcionamento das classes do framework.
         spl_autoload_register([
             'Autoload',
             'loader'
@@ -43,9 +43,11 @@ final class Autoload
     }
 
     /**
-     * Método para carregar as classes do framework.
+     * Loader class method
      *
-     * @param string $className Nome da classe que irá ser carregada
+     * @param string $className Class that should be loaded
+     * 
+     * @return void
      */
     public static function loader($className)
     {

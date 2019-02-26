@@ -74,7 +74,8 @@ class GrfFile
     /**
      * Constructor for reading grf file
      *
-     * @param string $fileName Name of the archive
+     * @param string $fileName       Name of the archive
+     * @param bool   $readFileTables This indicates if table files should be readed
      *
      * @return void
      */
@@ -98,13 +99,12 @@ class GrfFile
 
     /**
      * Performs a read in table files
+     * 
+     * @return void
      */
     private function readTableFiles()
     {
-        // No files to be readed?
-        if ($this->getHeader()->getFileCount() == 0)
-            return;
-
+        // ??
         $posinfo = [];
 
         // places the reader pointer in start of table files.
@@ -144,8 +144,6 @@ class GrfFile
             $this->entries[] = $entry;
             $tbm_table = substr($table, $pos);
         }
-
-        return;
     }
 
     /**
@@ -177,13 +175,13 @@ class GrfFile
     {
         // Read the full header
         fseek($this->ptrFile, 0, SEEK_SET);
-        $headerRead = fread($this->ptrFile, GrfFile::GRF_HEADER_SIZE);
+        $headerRead = fread($this->ptrFile, self::GRF_HEADER_SIZE);
 
         // Set the header parser
         $this->header = new GrfFileHeader(new BufferReader($headerRead));
 
         // Table files offset
-        $this->tableOffset = $this->getHeader()->getOffset() + GrfFile::GRF_HEADER_SIZE;
+        $this->tableOffset = $this->getHeader()->getOffset() + self::GRF_HEADER_SIZE;
     }
 
     /**
