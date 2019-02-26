@@ -74,7 +74,7 @@ class GrfFileHeader
     /**
      * Gets the grf file header.
      * 
-     * @param BufferReader $headerReader Full grf header file.
+     * @param BufferReader $buffer Full grf header file.
      *
      * @return void
      */
