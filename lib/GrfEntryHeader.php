@@ -83,8 +83,11 @@ class GrfEntryHeader
     /**
      * Reads the buffer and populates the file entries
      * 
-     * @param string $name   filename
-     * @param string $buffer bytes to populate the header entry
+     * @param string       $name   filename
+     * @param BufferReader $buffer bytes to populate the header entry
+     * @param GrfFile      $grf    The grf file who handles this file
+     * 
+     * @return void
      */
     public function __construct($name, BufferReader $buffer, GrfFile $grf)
     {
