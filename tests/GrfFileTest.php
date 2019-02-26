@@ -39,5 +39,22 @@ class GrfFileTest extends PHPUnit\Framework\TestCase
         $entries = $this->grf->getEntries();
 
         $this->assertEquals(9, $entries->count());
+
+        $grfEntry = $entries[0];
+        $this->assertInstanceOf('GrfEntryHeader', $grfEntry);
+
+        $this->assertEquals('data\\0_Tex1.bmp', $grfEntry->getFilename());
+        $this->assertEquals(52900, $grfEntry->getCompressedSize());
+        $this->assertEquals(52900, $grfEntry->getCompressedSizeAligned());
+        $this->assertEquals(196664, $grfEntry->getUnCompressedSize());
+        $this->assertEquals(1, $grfEntry->getFlags());
+        $this->assertEquals(46, $grfEntry->getOffset());
+        $this->assertEquals($this->grf, $grfEntry->getGrf());
+        $this->assertEquals('829ce15b9b3c89baccdfbc4d7fe3d435', $grfEntry->getHash());
+
+        $hashBuffer = hash('md5', $grfEntry->getUnCompressedBuffer());
+        $hashFile = hash_file('md5', 'tests\\0_Tex1.bmp');
+
+        $this->assertEquals($hashFile, $hashBuffer);
     }
 }
