@@ -26,6 +26,23 @@ require_once 'lib/autoload.php';
 
 class GrfFileWriterTest extends PHPUnit\Framework\TestCase
 {
+    public function testGrfCreate()
+    {
+        $grf = GrfFile::create('tests/test.grf');
+        $grf->save();
+        $grf->close();
+        $grf = null;
+
+        $grfHash = hash_file('md5', 'tests/test.grf');
+        $this->assertEquals('d8244c5dfc3e694971ed93dcc3a56e4c', $grfHash);
+
+        $grf = new GrfFile('tests/test.grf');
+        $this->assertEquals(0, $grf->getEntries()->count());
+        $grf->close();
+        $grf = null;
+        unlink('tests/test.grf');
+    }
+
     public function testGrfAddFile()
     {
         if (file_exists('tests/tmp_test200add.grf') === true)

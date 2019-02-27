@@ -67,7 +67,7 @@ $grf->close(); // Auto save when closed
 $grf = null;
 ```
 
-Then you call `$grf->save()` or `$grf->close()` this'll repack your grf.
+When you call `$grf->save()` or `$grf->close()` this'll repack your grf.
 Large grf files may take some minutes to finish.
 
 ## How to create a grf file to write?

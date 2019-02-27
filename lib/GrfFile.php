@@ -445,6 +445,47 @@ class GrfFile
     }
 
     /**
+     * Creates a new grf file formatted
+     * 
+     * @param string $filename new grf file name
+     * 
+     * @return GrfFile
+     */
+    public static function create($filename)
+    {
+        // Buffer for grf file...
+        $buffer = new BufferWriter();
+        $buffer->appendString(self::GRF_HEADER_MAGIC);
+        $buffer->appendUInt8(0);
+        for($i = 0; $i < 14; $i++)
+            $buffer->appendUInt8($i + 1);
+        $buffer->appendUInt32(0);
+        $buffer->appendUInt32(0); // seed
+        $buffer->appendUInt32(7);
+        $buffer->appendUInt32(0x200);
+
+        $tList = '';
+        $tListLen = strlen($tList);
+        $tListCompressed = zlib_encode($tList, ZLIB_ENCODING_DEFLATE);
+        $tListCompressedLen = strlen($tListCompressed);
+
+        $buffer->appendUInt32($tListCompressedLen); // Compressed table list
+        $buffer->appendUInt32($tListLen); // Total table list
+
+        $buffer->appendString($tListCompressed);
+        $buffer->appendUInt32(0);
+
+        $len = $buffer->getLength();
+
+        $fpNew = fopen($filename, 'wb');
+        fwrite($fpNew, $buffer->flush());
+        fflush($fpNew);
+        fclose($fpNew);
+
+        return new GrfFile($filename);
+    }
+
+    /**
      * Total header size.
      * 
      * @var int
