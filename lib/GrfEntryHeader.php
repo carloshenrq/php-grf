@@ -81,25 +81,44 @@ class GrfEntryHeader
     private $size;
 
     /**
+     * File bytes compressed state
+     * 
+     * @var string
+     */
+    private $compressedBytes;
+
+    /**
      * Reads the buffer and populates the file entries
      * 
-     * @param string       $name   filename
-     * @param BufferReader $buffer bytes to populate the header entry
-     * @param GrfFile      $grf    The grf file who handles this file
+     * @param string       $name      Filename
+     * @param BufferReader $buffer    Bytes to populate the header entry
+     * @param GrfFile      $grf       The grf file who handles this file
+     * @param string       $fileBytes File bytes content
      * 
      * @return void
      */
-    public function __construct($name, BufferReader $buffer, GrfFile $grf)
+    public function __construct($name, BufferReader $buffer = null, GrfFile $grf, $fileBytes = null)
     {
         $this->grf = $grf;
-
-        $this->filename = $name;
-        $this->compressedSize = $buffer->getUInt32();
-        $this->compressedSizeAligned = $buffer->getUInt32();
-        $this->unCompressedSize = $buffer->getUInt32();
-        $this->flags = $buffer->getUInt8();
-        $this->offset = $buffer->getUInt32() + GrfFile::GRF_HEADER_SIZE;
         $this->size = 17; // Fixed
+        $this->filename = utf8_encode($name);
+
+        if ($fileBytes === null) {
+            $this->compressedSize = $buffer->getUInt32();
+            $this->compressedSizeAligned = $buffer->getUInt32();
+            $this->unCompressedSize = $buffer->getUInt32();
+            $this->flags = $buffer->getUInt8();
+            $this->offset = $buffer->getUInt32() + GrfFile::GRF_HEADER_SIZE;
+            return;
+        }
+
+        // New files must to calculate they position
+        $this->compressedBytes = $this->grf->compress($fileBytes);
+        $this->compressedSize = strlen($this->compressedBytes);
+        $this->compressedSizeAligned = $this->compressedSize + (4 - (($this->compressedSize - 1) % 4)) - 1;
+        $this->unCompressedSize = strlen($fileBytes);
+        $this->flags = 1;
+        $this->offset = -1;
     }
 
     /**
@@ -124,9 +143,7 @@ class GrfEntryHeader
      */
     public function getUnCompressedBuffer()
     {
-        $compressed = $this->getCompressedBuffer();
-        $uncompressed = zlib_decode($compressed);
-        return $uncompressed;
+        return $this->grf->decompress($this->getCompressedBuffer());
     }
 
     /**
@@ -136,7 +153,12 @@ class GrfEntryHeader
      */
     public function getCompressedBuffer()
     {
-        return $this->getGrf()->readBuffer($this->getOffset(), $this->getCompressedSize());
+        if ($this->compressedBytes === null) {
+            $this->compressedBytes = $this->getGrf()->readBuffer($this->getOffset(), $this->getCompressedSize());
+            return $this->getCompressedBuffer();
+        }
+
+        return $this->compressedBytes;
     }
 
     /**

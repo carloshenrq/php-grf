@@ -44,29 +44,37 @@ class GrfFileHeader
     private $headerKey;
 
     /**
+     * Byte offset for file table list
+     * 
      * @var int
      */
     private $headerOffset;
 
     /**
-     * @int
+     * Seed from this grf file
+     * 
+     * @var int
      */
     private $headerSeed;
 
     /**
-     * @int
+     * File count in the header from this grf
+     * 
+     * @var int
      */
     private $headerFileCount;
 
     /**
-     * @int
+     * Version that grf was compressed
+     * 
+     * @var int
      */
     private $headerVersion;
 
     /**
      * Gets the grf file header.
      * 
-     * @param BufferReader $headerReader Full grf header file.
+     * @param BufferReader $buffer Full grf header file.
      *
      * @return void
      */

@@ -52,8 +52,28 @@ $grf = null;
 
 ## How to open a grf file to write?
 
+The same way you open to read, you can write. See:
+
 ```
-Comming soon (next release)
+require_once 'php-grf/lib/autoload.php';
+
+// Instance a reader/writer for your grf file
+$grf = new GrfFile('php-grf/tests/test200.grf');
+
+$grf->addFile('file-outside.txt', 'data\\file-inside.txt');
+
+// Dispose all resources used
+$grf->close(); // Auto save when closed
+$grf = null;
+```
+
+When you call `$grf->save()` or `$grf->close()` this'll repack your grf.
+Large grf files may take some minutes to finish.
+
+## How to create a grf file to write?
+
+```
+Soon...
 ```
 
 ## Install
