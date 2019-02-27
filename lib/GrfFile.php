@@ -343,7 +343,8 @@ class GrfFile
     }
 
     /**
-     * Saves the file writing and packing all data inside grf
+     * Saves the file writing and packing all data inside grf.
+     * This is a repack.
      * 
      * @return void
      */
@@ -382,48 +383,48 @@ class GrfFile
             $aligned = $entry->getCompressedSizeAligned();
 
             for ($i = $len; $i < $aligned; $i += fwrite($fpTmp, pack('c', 0)));
-            
-            $fileTableArray[] = (object)[
-                'filename' => utf8_decode($entry->getFilename()),
-                'size' => $len,
-                'aligned' => $aligned,
-                'real' => $entry->getUnCompressedSize(),
-                'flags' => $entry->getFlags(),
-                'offset' => $entryOffset
-            ];
+
             fflush($fpTmp);
+
+            // Append entry header in memory buffer
+            $buf->appendString(utf8_decode($entry->getFilename()));
+            $buf->appendUInt8(0);
+            $buf->appendUInt32($len);
+            $buf->appendUInt32($aligned);
+            $buf->appendUInt32($entry->getUnCompressedSize());
+            $buf->appendUInt8($entry->getFlags());
+            $buf->appendUInt32($entryOffset);
 
             $entryOffset += $aligned;
         }
 
-        foreach ($fileTableArray as $file) {
-            $buf->appendString($file->filename);
-            $buf->appendUInt8(0);
-            $buf->appendUInt32($file->size);
-            $buf->appendUInt32($file->aligned);
-            $buf->appendUInt32($file->real);
-            $buf->appendUInt8($file->flags);
-            $buf->appendUInt32($file->offset);
-        }
-
         // Calculates the size of table entries
+        // flushes the current buffer
         $tEntriesLen = $buf->getLength();
         $tEntries = $buf->flush();
         $tEntriesCompress = $this->compress($tEntries);
         $tEntriesCompressLen = strlen($tEntriesCompress);
 
+        // Appends the entries compressed length and the uncompressed
+        // length
         $buf->appendUInt32($tEntriesCompressLen);
         $buf->appendUInt32($tEntriesLen);
 
+        // Writes in the grf file the buffer table length
+        // and compressed table length
         fwrite($fpTmp, $buf->flush());
         fwrite($fpTmp, $tEntriesCompress);
         fwrite($fpTmp, pack('L', 0));
 
+        // Closes the tmp file
         fclose($fpTmp);
         $this->close();
 
+        // override the old file by the new one
         unlink($this->fileName);
         rename($tmpFile, $this->fileName);
+
+        // reloads the grf file
         $this->load($this->fileName, true);
     }
 
