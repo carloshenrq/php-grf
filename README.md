@@ -16,9 +16,9 @@ This is a lib to allow PHP to read and write GRF (Gravity Ragnarok Files).
 
 ## How i can colaborate?
 
-Please! check our  and if you can fix or add new features, you're welcome.
+Please! check our issues and if you can fix or add new features, you're welcome.
 
-Also, see if what you're about to change is in ours .
+Also, see if what you're about to change is in ours pull requests.
 
 ## How to open a file to read?
 
