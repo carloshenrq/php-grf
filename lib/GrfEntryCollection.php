@@ -35,6 +35,8 @@ class GrfEntryCollection implements IteratorAggregate, Countable, ArrayAccess
     /**
      * Starts the constructor for grf entries
      * 
+     * @param array $entries All start entries
+     * 
      * @return void
      */
     public function __construct($entries = [])
@@ -100,6 +102,11 @@ class GrfEntryCollection implements IteratorAggregate, Countable, ArrayAccess
         return isset($this->entries[$offset]);
     }
 
+    /**
+     * Gets the array iterator for entries.
+     * 
+     * @return ArrayIterator
+     */
     public function getIterator()
     {
         return new ArrayIterator($this->entries);
