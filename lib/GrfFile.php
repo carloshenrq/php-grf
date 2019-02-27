@@ -292,6 +292,7 @@ class GrfFile
      */
     public function addBuffer($name, $buffer)
     {
+        $name = str_replace('/', '\\', $name); // Replaces '/' by '\\'... Grf default separator
         $entry = new GrfEntryHeader($name, null, $this, $buffer);
         $this->entries[] = $entry;
         $this->isNeedingSave = true;
