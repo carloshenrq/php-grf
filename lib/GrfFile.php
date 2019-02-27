@@ -299,6 +299,18 @@ class GrfFile
     }
 
     /**
+     * Delete a file inside grf entries
+     * 
+     * @param string $name name of file
+     * 
+     * @return void
+     */
+    public function delete($name)
+    {
+        unset($this->entries[$name]);
+    }
+
+    /**
      * Decompress the data
      * 
      * @param string $data Compressed data

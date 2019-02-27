@@ -42,9 +42,10 @@ class GrfFileTest extends PHPUnit\Framework\TestCase
         unset($entries['data\\xampso.xml']);
         $this->assertNull($entries['data\\xampso.xml']);
 
-        $name = $entries->first()->getFilename();
+        $entry = $entries->first();
+        $name = $entry->getFilename();
         $this->assertNotNull($entries[$name]);
-        unset($entries[$name]);
+        $entry->delete();
         $this->assertNull($entries[$name]);
 
         $nullWhere = $entries->where('xamspoTest');

@@ -122,6 +122,16 @@ class GrfEntryHeader
     }
 
     /**
+     * Remove the file from entries collections
+     * 
+     * @return void
+     */
+    public function delete()
+    {
+        $this->getGrf()->delete($this->getFilename());
+    }
+
+    /**
      * Gets the hash for the file
      * 
      * @param string $algo Algorithm that'll hash the files
