@@ -40,7 +40,7 @@ class GrfFileTest extends PHPUnit\Framework\TestCase
 
         $this->assertEquals(9, $entries->count());
 
-        $grfEntry = $entries[0];
+        $grfEntry = $entries->first();
         $this->assertInstanceOf('GrfEntryHeader', $grfEntry);
 
         $this->assertEquals('data\\0_Tex1.bmp', $grfEntry->getFilename());

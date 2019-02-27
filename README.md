@@ -72,9 +72,20 @@ Large grf files may take some minutes to finish.
 
 ## How to create a grf file to write?
 
+Look here how to create a new grf file:
+
 ```
-Soon...
+require_once 'php-grf/lib/autoload.php';
+
+// Creates a new grf file with no files inside
+$grf = GrfFile::create('your-grf-file.grf');
+
+// Dispose all resources used
+$grf->close(); // Auto save when closed
+$grf = null;
 ```
+
+To add files, just check the section above...
 
 ## Install
 

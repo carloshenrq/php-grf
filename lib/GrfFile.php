@@ -108,7 +108,7 @@ class GrfFile
         $this->fileName = $fileName;
         $this->ptrFile = fopen($this->fileName, 'rb+');
 
-        $this->entries = new ArrayObject();
+        $this->entries = new GrfEntryCollection();
 
         // Reads this grf header
         $this->readHeader();
@@ -374,7 +374,6 @@ class GrfFile
         fwrite($fpTmp, $buf->flush());
         fflush($fpTmp);
 
-        $fileTableArray = new ArrayObject();
         $entryOffset = 0;
         foreach ($entries as $entry) {
             fseek($fpTmp, $entryOffset + self::GRF_HEADER_SIZE, SEEK_SET);

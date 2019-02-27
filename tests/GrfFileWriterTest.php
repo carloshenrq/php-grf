@@ -57,27 +57,22 @@ class GrfFileWriterTest extends PHPUnit\Framework\TestCase
         $grf = null;
 
         $grf = new GrfFile('tests/tmp_test200add.grf');
-        foreach ($grf->getEntries() as $entry) {
-            if (strcmp($entry->getFilename(), 'data\\phpunit.xml') == 0) {
-                $buffer = $entry->getUnCompressedBuffer();
-                $fileHash = hash_file('md5', 'phpunit.xml');
-                $buffHash = hash('md5', $buffer);
+        $entries = $grf->getEntries();
+        $entry = $entries['data\\phpunit.xml'];
 
-                $this->assertEquals($fileHash, $buffHash);
-                break;
-            }
-        }
+        $this->assertNotNull($entry);
+        $this->assertInstanceOf('GrfEntryHeader', $entry);
+
+        $fileHash = hash_file('md5', 'phpunit.xml');
+        $buffHash = hash('md5', $entry->getUnCompressedBuffer());
+
+        $this->assertEquals($fileHash, $buffHash);
 
         $grf->addFile('non-existent-file.txt', 'data\\non-existent-file.txt');
         $grf->save();
 
-        $e = null;
-        foreach ($grf->getEntries() as $entry) {
-            if (strcmp($entry->getFilename(), 'data\\non-existent-file.txt') == 0) {
-                $e = $entry;
-                break;
-            }
-        }
+        $entries = $grf->getEntries();
+        $e = $entries['data\\non-existent-file.txt'];
 
         // Can't find unexistent file.
         $this->assertNull($e);
