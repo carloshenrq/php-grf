@@ -72,13 +72,6 @@ class GrfFile
     private $entries;
 
     /**
-     * Last file offset
-     * 
-     * @return int
-     */
-    private $lastOffset;
-
-    /**
      * Check if this grf file is needing to be saved.
      * 
      * @var bool
@@ -98,6 +91,14 @@ class GrfFile
         $this->load($fileName, $readFileTables);
     }
 
+    /**
+     * Performs a loading in grf file
+     * 
+     * @param string $fileName       Name of the archive
+     * @param bool   $readFileTables This indicates if table files should be readed
+     * 
+     * @return void
+     */
     private function load($fileName, $readFileTables)
     {
         // The file doesn't exists?
@@ -274,9 +275,9 @@ class GrfFile
             return;
 
         $size = filesize($oname);
-        $fp = fopen($oname, 'rb');
-        $buffer = fread($fp, $size);
-        fclose($fp);
+        $fpBuf = fopen($oname, 'rb');
+        $buffer = fread($fpBuf, $size);
+        fclose($fpBuf);
 
         $this->addBuffer($iname, $buffer);
     }
@@ -354,7 +355,7 @@ class GrfFile
         $tmpFile = $this->fileName . '.tmp';
 
         // Buffer writer
-        $fp = fopen($tmpFile, 'wb');
+        $fpTmp = fopen($tmpFile, 'wb');
 
         foreach ($entries as $entry)
             $tableFilesOffset += $entry->getCompressedSizeAligned();
@@ -368,18 +369,18 @@ class GrfFile
         $buf->appendUInt32($entries->count() + 7);
         $buf->appendUInt32(0x200);
 
-        fwrite($fp, $buf->flush());
-        fflush($fp);
+        fwrite($fpTmp, $buf->flush());
+        fflush($fpTmp);
 
         $fileTableArray = new ArrayObject();
         $entryOffset = 0;
         foreach ($entries as $entry) {
-            fseek($fp, $entryOffset + self::GRF_HEADER_SIZE, SEEK_SET);
+            fseek($fpTmp, $entryOffset + self::GRF_HEADER_SIZE, SEEK_SET);
 
-            $len = fwrite($fp, $entry->getCompressedBuffer());
+            $len = fwrite($fpTmp, $entry->getCompressedBuffer());
             $aligned = $entry->getCompressedSizeAligned();
 
-            for ($i = $len; $i < $aligned; $i += fwrite($fp, pack('c', 0)));
+            for ($i = $len; $i < $aligned; $i += fwrite($fpTmp, pack('c', 0)));
             
             $fileTableArray[] = (object)[
                 'filename' => utf8_decode($entry->getFilename()),
@@ -389,7 +390,7 @@ class GrfFile
                 'flags' => $entry->getFlags(),
                 'offset' => $entryOffset
             ];
-            fflush($fp);
+            fflush($fpTmp);
 
             $entryOffset += $aligned;
         }
@@ -405,19 +406,19 @@ class GrfFile
         }
 
         // Calculates the size of table entries
-        $tableEntriesSize = $buf->getLength();
-        $tableEntries = $buf->flush();
-        $tableEntriesCompressed = $this->compress($tableEntries);
-        $tableEntriesCompressedSize = strlen($tableEntriesCompressed);
+        $tEntriesLen = $buf->getLength();
+        $tEntries = $buf->flush();
+        $tEntriesCompress = $this->compress($tEntries);
+        $tEntriesCompressLen = strlen($tEntriesCompress);
 
-        $buf->appendUInt32($tableEntriesCompressedSize);
-        $buf->appendUInt32($tableEntriesSize);
+        $buf->appendUInt32($tEntriesCompressLen);
+        $buf->appendUInt32($tEntriesLen);
 
-        fwrite($fp, $buf->flush());
-        fwrite($fp, $tableEntriesCompressed);
-        fwrite($fp, pack('L', 0));
+        fwrite($fpTmp, $buf->flush());
+        fwrite($fpTmp, $tEntriesCompress);
+        fwrite($fpTmp, pack('L', 0));
 
-        fclose($fp);
+        fclose($fpTmp);
         $this->close();
 
         unlink($this->fileName);
