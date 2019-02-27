@@ -16,9 +16,9 @@ This is a lib to allow PHP to read and write GRF (Gravity Ragnarok Files).
 
 ## How i can colaborate?
 
-Please! check our  and if you can fix or add new features, you're welcome.
+Please! check our issues and if you can fix or add new features, you're welcome.
 
-Also, see if what you're about to change is in ours .
+Also, see if what you're about to change is in ours pull requests.
 
 ## How to open a file to read?
 
@@ -50,6 +50,44 @@ foreach ($grf->getEntries() as $entry) {
 $grf = null;
 ```
 
+If you wanna search inside entries:
+
+```
+<?php
+require_once 'php-grf/lib/autoload.php';
+
+// Instance a reader/writer for your grf file
+$grf = new GrfFile('php-grf/tests/test200.grf');
+
+// Find all files in entries (including added)
+// when uncompressed the size is more then 1000 bytes.
+$search = $grf->getEntries()->where(function($entry) {
+	return $entry->getUnCompressedSize() > 1000;
+});
+
+// Dispose all resources used
+$grf = null;
+```
+
+Know the full path inside grf the file is?
+
+```
+<?php
+require_once 'php-grf/lib/autoload.php';
+
+// Instance a reader/writer for your grf file
+$grf = new GrfFile('php-grf/tests/test200.grf');
+$entries = $grf->getEntries();
+$entry = $entries['data\\0_Tex1.bmp'];
+
+if ($entry === null) { // not found
+
+}
+
+// Dispose all resources used
+$grf = null;
+```
+
 ## How to open a grf file to write?
 
 The same way you open to read, you can write. See:
@@ -72,9 +110,20 @@ Large grf files may take some minutes to finish.
 
 ## How to create a grf file to write?
 
+Look here how to create a new grf file:
+
 ```
-Soon...
+require_once 'php-grf/lib/autoload.php';
+
+// Creates a new grf file with no files inside
+$grf = GrfFile::create('your-grf-file.grf');
+
+// Dispose all resources used
+$grf->close(); // Auto save when closed
+$grf = null;
 ```
+
+To add files, just check the section above...
 
 ## Install
 

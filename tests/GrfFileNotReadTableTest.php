@@ -54,7 +54,7 @@ class GrfFileNotReadTableTest extends PHPUnit\Framework\TestCase
     {
         $entries = $this->grf->getEntries();
 
-        $this->assertInstanceOf('ArrayObject', $entries);
+        $this->assertInstanceOf('GrfEntryCollection', $entries);
         $this->assertEquals(0, $entries->count());
     }
 

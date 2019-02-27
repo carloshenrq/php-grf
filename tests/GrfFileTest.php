@@ -34,13 +34,52 @@ class GrfFileTest extends PHPUnit\Framework\TestCase
         $this->grf = new GrfFile('tests/test200.grf');
     }
 
+    public function testEntriesCollection()
+    {
+        $entries = $this->grf->getEntries();
+
+        $this->assertNull($entries['data\\xampso.xml']);
+        unset($entries['data\\xampso.xml']);
+        $this->assertNull($entries['data\\xampso.xml']);
+
+        $entry = $entries->first();
+        $name = $entry->getFilename();
+        $this->assertNotNull($entries[$name]);
+        $entry->delete();
+        $this->assertNull($entries[$name]);
+
+        $nullWhere = $entries->where('xamspoTest');
+        $this->assertNull($nullWhere);
+
+        $otherEntries = $entries->where(function($e) use ($name) {
+            return strcmp($e->getFilename(), $name) !== 0;
+        });
+
+        $this->assertEquals(8, $otherEntries->count());
+
+        $first = $entries->first(function($e) use ($name) {
+            return strcmp($e->getFilename(), $name) !== 0;
+        });
+
+        $this->assertInstanceOf('GrfEntryHeader', $first);
+
+        $last = $entries->last();
+        $this->assertInstanceOf('GrfEntryHeader', $last);
+
+        $last = $entries->last(function($e) use ($name) {
+            return strcmp($e->getFilename(), $name) !== 0;
+        });
+
+        $this->assertInstanceOf('GrfEntryHeader', $last);
+    }
+
     public function testEntriesCount()
     {
         $entries = $this->grf->getEntries();
 
         $this->assertEquals(9, $entries->count());
 
-        $grfEntry = $entries[0];
+        $grfEntry = $entries->first();
         $this->assertInstanceOf('GrfEntryHeader', $grfEntry);
 
         $this->assertEquals('data\\0_Tex1.bmp', $grfEntry->getFilename());
