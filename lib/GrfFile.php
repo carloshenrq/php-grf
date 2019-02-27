@@ -261,29 +261,6 @@ class GrfFile
     }
 
     /**
-     * If the offset here is the last value
-     * 
-     * @param int $offset last offset
-     * 
-     * @return void
-     */
-    public function setLastOffsetFile($offset)
-    {
-        if ($offset >= $this->lastOffset)
-            $this->lastOffset = $offset;
-    }
-
-    /**
-     * Gets the last offset for files
-     * 
-     * @return int
-     */
-    public function getLastOffsetFile()
-    {
-        return $this->lastOffset;
-    }
-
-    /**
      * Add new fileinside grf
      * 
      * @param string $oname The file name outise grf

@@ -108,9 +108,7 @@ class GrfEntryHeader
             $this->compressedSizeAligned = $buffer->getUInt32();
             $this->unCompressedSize = $buffer->getUInt32();
             $this->flags = $buffer->getUInt8();
-            $this->offset = $buffer->getUInt32();
-            $this->grf->setLastOffsetFile($this->offset);
-            $this->offset += GrfFile::GRF_HEADER_SIZE;
+            $this->offset = $buffer->getUInt32() + GrfFile::GRF_HEADER_SIZE;
             return;
         }
 
@@ -120,9 +118,7 @@ class GrfEntryHeader
         $this->compressedSizeAligned = $this->compressedSize + (4 - (($this->compressedSize - 1) % 4)) - 1;
         $this->unCompressedSize = strlen($fileBytes);
         $this->flags = 1;
-        $this->offset = $this->grf->getLastOffsetFile();
-        $this->grf->setLastOffsetFile($this->offset);
-        $this->offset += GrfFile::GRF_HEADER_SIZE;
+        $this->offset = -1;
     }
 
     /**
@@ -173,11 +169,6 @@ class GrfEntryHeader
     public function getGrf()
     {
         return $this->grf;
-    }
-
-    public function setOffset($offset)
-    {
-        $this->offset = $offset;
     }
 
     /**
@@ -248,25 +239,5 @@ class GrfEntryHeader
     public function getHeaderLength()
     {
         return $this->size;
-    }
-
-    /**
-     * Gets the table header buffer
-     * 
-     * @return string
-     */
-    public function getTableHeader()
-    {
-        $buffer = new BufferWriter();
-
-        $buffer->appendString($this->getFilename());
-        $buffer->appendUInt8(0);
-        $buffer->appendUInt32($this->getCompressedSize());
-        $buffer->appendUInt32($this->getCompressedSizeAligned());
-        $buffer->appendUInt32($this->getUnCompressedSize());
-        $buffer->appendUInt8(1);
-        $buffer->appendUInt32($this->getOffset() - GrfFile::GRF_HEADER_SIZE);
-
-        return $buffer->flush();
     }
 }
