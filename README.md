@@ -50,6 +50,44 @@ foreach ($grf->getEntries() as $entry) {
 $grf = null;
 ```
 
+If you wanna search inside entries:
+
+```
+<?php
+require_once 'php-grf/lib/autoload.php';
+
+// Instance a reader/writer for your grf file
+$grf = new GrfFile('php-grf/tests/test200.grf');
+
+// Find all files in entries (including added)
+// when uncompressed the size is more then 1000 bytes.
+$search = $grf->getEntries()->where(function($entry) {
+	return $entry->getUnCompressedSize() > 1000;
+});
+
+// Dispose all resources used
+$grf = null;
+```
+
+Know the full path inside grf the file is?
+
+```
+<?php
+require_once 'php-grf/lib/autoload.php';
+
+// Instance a reader/writer for your grf file
+$grf = new GrfFile('php-grf/tests/test200.grf');
+$entries = $grf->getEntries();
+$entry = $entries['data\\0_Tex1.bmp'];
+
+if ($entry === null) { // not found
+
+}
+
+// Dispose all resources used
+$grf = null;
+```
+
 ## How to open a grf file to write?
 
 The same way you open to read, you can write. See:
