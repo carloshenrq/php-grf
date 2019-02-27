@@ -72,6 +72,20 @@ class GrfFile
     private $entries;
 
     /**
+     * Last file offset
+     * 
+     * @return int
+     */
+    private $lastOffset;
+
+    /**
+     * Check if this grf file is needing to be saved.
+     * 
+     * @var bool
+     */
+    private $isNeedingSave;
+
+    /**
      * Constructor for reading grf file
      *
      * @param string $fileName       Name of the archive
@@ -80,6 +94,11 @@ class GrfFile
      * @return void
      */
     public function __construct($fileName, $readFileTables = true)
+    {
+        $this->load($fileName, $readFileTables);
+    }
+
+    private function load($fileName, $readFileTables)
     {
         // The file doesn't exists?
         if (file_exists($fileName) === false)
@@ -95,6 +114,9 @@ class GrfFile
 
         if ($readFileTables)
             $this->readTableFiles();
+
+        // No need to save when open
+        $this->isNeedingSave = false;
     }
 
     /**
@@ -135,7 +157,8 @@ class GrfFile
             $av_len = $max_pos - $pos;
             $fn_len = $this->getAvLen($tbm_table, $av_len);
 
-            $filename = utf8_encode(substr($table, $pos, $fn_len));
+            $buffer = new BufferReader(substr($table, $pos, $fn_len));
+            $filename = $buffer->getString($buffer->getLength());
             $pos += ($fn_len + 1);
 
             $entry = new GrfEntryHeader($filename, new BufferReader(substr($table, $pos)), $this);
@@ -238,6 +261,89 @@ class GrfFile
     }
 
     /**
+     * If the offset here is the last value
+     * 
+     * @param int $offset last offset
+     * 
+     * @return void
+     */
+    public function setLastOffsetFile($offset)
+    {
+        if ($offset >= $this->lastOffset)
+            $this->lastOffset = $offset;
+    }
+
+    /**
+     * Gets the last offset for files
+     * 
+     * @return int
+     */
+    public function getLastOffsetFile()
+    {
+        return $this->lastOffset;
+    }
+
+    /**
+     * Add new fileinside grf
+     * 
+     * @param string $oname The file name outise grf
+     * @param string $iname The file name inside grf
+     * 
+     * @return void
+     */
+    public function addFile($oname, $iname)
+    {
+        if (file_exists($oname) === false)
+            return;
+
+        $size = filesize($oname);
+        $fp = fopen($oname, 'rb');
+        $buffer = fread($fp, $size);
+        fclose($fp);
+
+        $this->addBuffer($iname, $buffer);
+    }
+
+    /**
+     * Add new named buffer in grf...
+     * 
+     * @param string $name   The name inside grf
+     * @param string $buffer File contents
+     * 
+     * @return void
+     */
+    public function addBuffer($name, $buffer)
+    {
+        $entry = new GrfEntryHeader($name, null, $this, $buffer);
+        $this->entries[] = $entry;
+        $this->isNeedingSave = true;
+    }
+
+    /**
+     * Decompress the data
+     * 
+     * @param string $data Compressed data
+     * 
+     * @return string
+     */
+    public function decompress($data)
+    {
+        return zlib_decode($data);
+    }
+
+    /**
+     * Compresses the data
+     * 
+     * @param string $data Data to be compressed
+     * 
+     * @return string
+     */
+    public function compress($data)
+    {
+        return zlib_encode($data, ZLIB_ENCODING_DEFLATE);
+    }
+
+    /**
      * Returns the file header readed.
      *
      * @return GrfFileHeader
@@ -258,12 +364,100 @@ class GrfFile
     }
 
     /**
+     * Saves the file writing and packing all data inside grf
+     * 
+     * @return void
+     */
+    public function save()
+    {
+        $this->isNeedingSave = false;
+        $header = $this->getHeader();
+        $entries = $this->getEntries();
+        $tableFilesOffset = 0;
+        $tmpFile = $this->fileName . '.tmp';
+
+        // Buffer writer
+        $fp = fopen($tmpFile, 'wb');
+
+        foreach ($entries as $entry)
+            $tableFilesOffset += $entry->getCompressedSizeAligned();
+
+        $buf = new BufferWriter();
+        $buf->appendString($header->getMagic());
+        $buf->appendUInt8(0);
+        $buf->appendString($header->getKey());
+        $buf->appendUInt32($tableFilesOffset); // This resets the header... should be calculated again...
+        $buf->appendUInt32(0);
+        $buf->appendUInt32($entries->count() + 7);
+        $buf->appendUInt32(0x200);
+
+        fwrite($fp, $buf->flush());
+        fflush($fp);
+
+        $fileTableArray = new ArrayObject();
+        $entryOffset = 0;
+        foreach ($entries as $entry) {
+            fseek($fp, $entryOffset + self::GRF_HEADER_SIZE, SEEK_SET);
+
+            $len = fwrite($fp, $entry->getCompressedBuffer());
+            $aligned = $entry->getCompressedSizeAligned();
+
+            for ($i = $len; $i < $aligned; $i += fwrite($fp, pack('c', 0)));
+            
+            $fileTableArray[] = (object)[
+                'filename' => utf8_decode($entry->getFilename()),
+                'size' => $len,
+                'aligned' => $aligned,
+                'real' => $entry->getUnCompressedSize(),
+                'flags' => $entry->getFlags(),
+                'offset' => $entryOffset
+            ];
+            fflush($fp);
+
+            $entryOffset += $aligned;
+        }
+
+        foreach ($fileTableArray as $file) {
+            $buf->appendString($file->filename);
+            $buf->appendUInt8(0);
+            $buf->appendUInt32($file->size);
+            $buf->appendUInt32($file->aligned);
+            $buf->appendUInt32($file->real);
+            $buf->appendUInt8($file->flags);
+            $buf->appendUInt32($file->offset);
+        }
+
+        // Calculates the size of table entries
+        $tableEntriesSize = $buf->getLength();
+        $tableEntries = $buf->flush();
+        $tableEntriesCompressed = $this->compress($tableEntries);
+        $tableEntriesCompressedSize = strlen($tableEntriesCompressed);
+
+        $buf->appendUInt32($tableEntriesCompressedSize);
+        $buf->appendUInt32($tableEntriesSize);
+
+        fwrite($fp, $buf->flush());
+        fwrite($fp, $tableEntriesCompressed);
+        fwrite($fp, pack('L', 0));
+
+        fclose($fp);
+        $this->close();
+
+        unlink($this->fileName);
+        rename($tmpFile, $this->fileName);
+        $this->load($this->fileName, true);
+    }
+
+    /**
      * Closes the grf file handler
      *
      * @return void
      */
     public function close()
     {
+        if ($this->isNeedingSave)
+            $this->save();
+
         if ($this->ptrFile !== null) {
             fclose($this->ptrFile);
             $this->ptrFile = null;
