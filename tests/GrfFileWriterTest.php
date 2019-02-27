@@ -50,6 +50,21 @@ class GrfFileWriterTest extends PHPUnit\Framework\TestCase
                 break;
             }
         }
+
+        $grf->addFile('non-existent-file.txt', 'data\\non-existent-file.txt');
+        $grf->save();
+
+        $e = null;
+        foreach ($grf->getEntries() as $entry) {
+            if (strcmp($entry->getFilename(), 'data\\non-existent-file.txt') == 0) {
+                $e = $entry;
+                break;
+            }
+        }
+
+        // Can't find unexistent file.
+        $this->assertNull($e);
+
         $grf->close();
         unlink('tests/tmp_test200add.grf');
     }
