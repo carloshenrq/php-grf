@@ -26,27 +26,52 @@ require_once 'lib/autoload.php';
 
 class GrfFileWriterTest extends PHPUnit\Framework\TestCase
 {
-    private $grf;
-
-    public function setUp()
+    public function testGrfAddFile()
     {
-        if (file_exists('tests/tmp_test200.grf') === false)
-            copy('tests/test200.grf', 'tests/tmp_test200.grf');
+        if (file_exists('tests/tmp_test200add.grf') === true)
+            unlink('tests/tmp_test200add.grf');
 
-        $this->grf = new GrfFile('tests/tmp_test200.grf');
+        copy('tests/test200.grf', 'tests/tmp_test200add.grf');
+
+        // Adds new file inside grf.
+        $grf = new GrfFile('tests/tmp_test200add.grf');
+        $grf->addFile('phpunit.xml', 'data\\phpunit.xml');
+        $grf->close();
+        $grf = null;
+
+        $grf = new GrfFile('tests/tmp_test200add.grf');
+        foreach ($grf->getEntries() as $entry) {
+            if (strcmp($entry->getFilename(), 'data\\phpunit.xml') == 0) {
+                $buffer = $entry->getUnCompressedBuffer();
+                $fileHash = hash_file('md5', 'phpunit.xml');
+                $buffHash = hash('md5', $buffer);
+
+                $this->assertEquals($fileHash, $buffHash);
+                break;
+            }
+        }
+        $grf->close();
+        unlink('tests/tmp_test200add.grf');
     }
 
     public function testGrfRepack()
     {
+        if (file_exists('tests/tmp_test200repack.grf') === true)
+            unlink('tests/tmp_test200repack.grf');
+
+        copy('tests/test200.grf', 'tests/tmp_test200repack.grf');
+
+        $grf = new GrfFile('tests/tmp_test200repack.grf');
+
         // before repack
-        $this->assertEquals(936658, $this->grf->getFullsize());
+        $this->assertEquals(936658, $grf->getFullsize());
 
         // saves the grf and recalculate the size
-        $this->grf->save();
+        $grf->save();
 
-        $this->assertEquals(858333, $this->grf->getFullsize());
+        $this->assertEquals(858333, $grf->getFullsize());
 
-        $this->grf->close();
-        unlink('tests/tmp_test200.grf');
+        $grf->close();
+        unlink('tests/tmp_test200repack.grf');
     }
 }
